@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prasanth Kumar | Portfolio</title>
+    <style>
+        body {
+            font-family: 'Poppins', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 100%);
+            color: #333;
+            line-height: 1.7;
+        }
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            text-align: center;
+            padding: 100px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 56px;
+            font-weight: 700;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        header p {
+            margin: 15px 0 0;
+            font-size: 24px;
+            opacity: 0.95;
+        }
+        section {
+            max-width: 1000px;
+            margin: 80px auto;
+            padding: 0 20px;
+        }
+        h2 {
+            text-align: center;
+            color: #1e3a8a;
+            margin-bottom: 50px;
+            font-size: 40px;
+            position: relative;
+        }
+        h2::after {
+            content: '';
+            width: 80px;
+            height: 4px;
+            background: #3b82f6;
+            display: block;
+            margin: 15px auto 0;
+            border-radius: 2px;
+        }
+        #about p {
+            text-align: justify;
+            font-size: 18px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        #skills ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        #skills li {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        #skills li:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(59, 130, 246, 0.4);
+        }
+        #projects .project {
+            background: white;
+            padding: 40px;
+            margin-bottom: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        #projects .project:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        }
+        #projects h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+            font-size: 28px;
+        }
+        #projects p {
+            font-size: 17px;
+        }
+        footer {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            text-align: center;
+            padding: 40px;
+            font-size: 17px;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1);
+        }
+        footer a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>Prasanth Kumar</h1>
+        <p>Full Stack Developer</p>
+    </header>
+
+    <section id="about">
+        <h2>About Me</h2>
+        <p>
+            Hello! I'm Prasanth Kumar, a passionate Full Stack Developer with expertise in both front-end and back-end technologies. 
+            I enjoy building complete web applications from scratch, handling everything from database design to responsive user interfaces. 
+            Proficient in modern frameworks and tools, I focus on creating scalable, efficient, and user-friendly solutions. 
+            In my free time, I love exploring new technologies, solving complex problems, and contributing to open-source projects.
+        </p>
+    </section>
+
+    <section id="skills">
+        <h2>Skills</h2>
+        <ul>
+            <li>HTML</li>
+            <li>CSS</li>
+            <li>JavaScript</li>
+            <li>React</li>
+            <li>Node.js</li>
+            <li>Express.js</li>
+            <li>MongoDB</li>
+            <li>MySQL</li>
+            <li>Git & GitHub</li>
+            <li>REST APIs</li>
+            <li>Bootstrap</li>
+            <li>Responsive Design</li>
+        </ul>
+    </section>
+
+    <section id="projects">
+        <h2>Projects</h2>
+        <div class="project">
+            <h3>Book Bazaar</h3>
+            <p>A full-stack online book marketplace built with MERN stack (MongoDB, Express, React, Node.js). Users can register, browse books, add listings, search, filter by category, and manage their own postings with a responsive and intuitive interface.</p>
+        </div>
+        <div class="project">
+            <h3>Food Waste Organization</h3>
+            <p>A full-stack social impact web app developed using Node.js, Express, MongoDB, and React. Connects food donors (restaurants/hotels) with NGOs and recipients. Features user authentication, real-time donation listings, request management, and location-based suggestions.</p>
+        </div>
+        <div class="project">
+            <h3>Fitness Tracker</h3>
+            <p>A complete full-stack fitness tracking application built with React on the frontend and Node.js/Express with MongoDB on the backend. Users can sign up, log workouts, track progress with charts, set goals, and view detailed statistics with secure authentication.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>Contact Me: <a href="mailto:prasanthkumarnlr@gmail.com">prasanthkumarnlr@gmail.com</a></p>
+        <p>&copy; 2025 Prasanth Kumar. All rights reserved.</p>
+    </footer>
+</body>
+</html>
