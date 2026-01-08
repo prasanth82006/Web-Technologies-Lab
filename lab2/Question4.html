@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(269deg, #8266ea 0%, #f91e08 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 50px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input.error {
+            border-color: #e74c3c;
+        }
+
+        .error-msg {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .button-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5a67d8;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-clear {
+            background: #95a5a6;
+            margin-top: 20px;
+        }
+
+        .btn-clear:hover {
+            background: #7f8c8d;
+        }
+
+        .table-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+
+        tr:hover {
+            background: #f1f3f5;
+        }
+
+        .no-users {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 18px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .form-section,
+            .table-section {
+                padding: 20px;
+                margin-left: 10px;
+                margin-right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>User Management System</h1>
+
+        <div class="form-section">
+            <h2 style="text-align: center;">Register New User</h2>
+            <form id="registerForm">
+                <div class="form-grid">
+                    <div>
+                        <label for="name">Name</label>
+                        <input type="text" id="name" required>
+                        <div class="error-msg" id="nameError">Name is required</div>
+                    </div>
+
+                    <div>
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                        <div class="error-msg" id="emailError">Valid email is required</div>
+                        <div class="error-msg" id="emailDupError">Email already registered</div>
+                    </div>
+
+                    <div>
+                        <label for="mobile">Mobile Number</label>
+                        <input type="text" id="mobile" maxlength="10" required>
+                        <div class="error-msg" id="mobileError">10-digit mobile number required</div>
+                    </div>
+
+                    <div>
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required>
+                        <div class="error-msg" id="passError">Password must be at least 6 characters</div>
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <button type="submit">Register User</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Registered Users</h2>
+                <button class="btn-clear" id="clearAll">Clear All Users</button>
+            </div>
+
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Mobile</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('registerForm');
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const mobileInput = document.getElementById('mobile');
+        const passwordInput = document.getElementById('password');
+        const usersBody = document.getElementById('usersBody');
+        const clearAllBtn = document.getElementById('clearAll');
+
+        function loadUsers() {
+            usersBody.innerHTML = '';
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+
+            if (users.length === 0) {
+                usersBody.innerHTML = '<tr><td colspan="4" class="no-users">No users registered yet</td></tr>';
+                return;
+            }
+
+            users.forEach((user, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.mobile}</td>
+                    <td class="actions">
+                        <button class="btn-danger" onclick="deleteUser(${index})">Delete</button>
+                    </td>
+                `;
+                usersBody.appendChild(row);
+            });
+        }
+
+        function isDuplicateEmail(email) {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            return users.some(user => user.email === email);
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            let valid = true;
+
+            document.querySelectorAll('.error-msg').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('input').forEach(el => el.classList.remove('error'));
+
+            if (nameInput.value.trim() === '') {
+                document.getElementById('nameError').style.display = 'block';
+                nameInput.classList.add('error');
+                valid = false;
+            }
+
+            if (!emailInput.checkValidity()) {
+                document.getElementById('emailError').style.display = 'block';
+                emailInput.classList.add('error');
+                valid = false;
+            } else if (isDuplicateEmail(emailInput.value)) {
+                document.getElementById('emailDupError').style.display = 'block';
+                emailInput.classList.add('error');
+                valid = false;
+            }
+
+            if (!/^\d{10}$/.test(mobileInput.value)) {
+                document.getElementById('mobileError').style.display = 'block';
+                mobileInput.classList.add('error');
+                valid = false;
+            }
+
+            if (passwordInput.value.length < 6) {
+                document.getElementById('passError').style.display = 'block';
+                passwordInput.classList.add('error');
+                valid = false;
+            }
+
+            if (!valid) return;
+
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            users.push({
+                name: nameInput.value.trim(),
+                email: emailInput.value,
+                mobile: mobileInput.value,
+                password: passwordInput.value
+            });
+
+            localStorage.setItem('users', JSON.stringify(users));
+            form.reset();
+            loadUsers();
+        });
+
+        function deleteUser(index) {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            users.splice(index, 1);
+            localStorage.setItem('users', JSON.stringify(users));
+            loadUsers();
+        }
+
+        clearAllBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to delete all users?')) {
+                localStorage.removeItem('users');
+                loadUsers();
+            }
+        });
+
+        loadUsers();
+    </script>
+</body>
+</html>
