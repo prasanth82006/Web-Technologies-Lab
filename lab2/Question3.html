@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Drag and Drop Task Manager</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .add-task {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        #taskInput {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        #taskInput:focus {
+            border-color: #6c5ce7;
+        }
+        #addBtn {
+            padding: 12px 25px;
+            font-size: 16px;
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        #addBtn:hover {
+            background: #5a4fcf;
+        }
+        .board {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .column {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .column h2 {
+            text-align: center;
+            margin: 0 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid;
+            font-size: 1.4em;
+        }
+        #todo h2 {
+            color: #e74c3c;
+            border-color: #e74c3c;
+        }
+        #inprogress h2 {
+            color: #f39c12;
+            border-color: #f39c12;
+        }
+        #completed h2 {
+            color: #27ae60;
+            border-color: #27ae60;
+        }
+        .tasks {
+            min-height: 400px;
+            padding: 10px;
+        }
+        .task-card {
+            background: white;
+            margin-bottom: 12px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: move;
+            transition: all 0.3s;
+            user-select: none;
+        }
+        .task-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+        .task-card.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+        .task-card.todo {
+            background: #e74c3c;
+            color: white;
+        }
+        .task-card.inprogress {
+            background: #f39c12;
+            color: white;
+        }
+        .task-card.completed {
+            background: #27ae60;
+            color: white;
+        }
+        .task-card.todo .task-date,
+        .task-card.inprogress .task-date,
+        .task-card.completed .task-date {
+            color: rgba(255,255,255,0.9);
+        }
+        .task-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+        .task-date {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            font-size: 1.1em;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.4s ease;
+            z-index: 1000;
+        }
+        .success-message.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        @media (max-width: 768px) {
+            .board {
+                flex-direction: column;
+            }
+            .add-task {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Task Board</h1>
+
+        <div class="add-task">
+            <input type="text" id="taskInput" placeholder="Enter task name..." />
+            <button id="addBtn">Add Task</button>
+        </div>
+
+        <div class="board">
+            <div class="column" id="todo" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <h2>To Do</h2>
+                <div class="tasks" id="todo-tasks"></div>
+            </div>
+
+            <div class="column" id="inprogress" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <h2>In Progress</h2>
+                <div class="tasks" id="inprogress-tasks"></div>
+            </div>
+
+            <div class="column" id="completed" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <h2>Completed</h2>
+                <div class="tasks" id="completed-tasks"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="success-message" id="successMsg">Task Completed Successfully!</div>
+
+    <script>
+        const addBtn = document.getElementById('addBtn');
+        const taskInput = document.getElementById('taskInput');
+        const successMsg = document.getElementById('successMsg');
+
+        addBtn.addEventListener('click', addTask);
+
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+
+        function addTask() {
+            const taskName = taskInput.value.trim();
+            if (taskName === '') {
+                alert('Please enter a task name!');
+                return;
+            }
+
+            const taskCard = document.createElement('div');
+            taskCard.className = 'task-card todo';
+            taskCard.draggable = true;
+            taskCard.id = 'task-' + Date.now();
+
+            const currentDate = new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            taskCard.innerHTML = `
+                <div class="task-name">${taskName}</div>
+                <div class="task-date">${currentDate}</div>
+            `;
+
+            taskCard.addEventListener('dragstart', (e) => {
+                taskCard.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', taskCard.id);
+            });
+
+            taskCard.addEventListener('dragend', () => {
+                taskCard.classList.remove('dragging');
+            });
+
+            document.getElementById('todo-tasks').appendChild(taskCard);
+
+            taskInput.value = '';
+            taskInput.focus();
+        }
+
+        function allowDrop(e) {
+            e.preventDefault();
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text/plain');
+            const taskCard = document.getElementById(id);
+
+            const targetColumn = e.target.closest('.column');
+            if (targetColumn) {
+                const tasksContainer = targetColumn.querySelector('.tasks');
+                tasksContainer.appendChild(taskCard);
+
+                taskCard.classList.remove('todo', 'inprogress', 'completed');
+                if (targetColumn.id === 'todo') {
+                    taskCard.classList.add('todo');
+                } else if (targetColumn.id === 'inprogress') {
+                    taskCard.classList.add('inprogress');
+                } else if (targetColumn.id === 'completed') {
+                    taskCard.classList.add('completed');
+                    showSuccessMessage();
+                }
+            }
+        }
+
+        function showSuccessMessage() {
+            successMsg.classList.add('show');
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
