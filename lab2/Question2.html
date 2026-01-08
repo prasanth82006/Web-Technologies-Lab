@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5 Audio and Video Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 40px;
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 40px;
+        }
+        h2 {
+            color: #34495e;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+        .media-section {
+            margin-bottom: 60px;
+        }
+        audio, video {
+            width: 100%;
+            max-width: 700px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .controls {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+        button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .time-display {
+            min-width: 120px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>HTML5 Audio and Video Exercise</h1>
+        
+        <div class="media-section">
+            <h2>Hukum song:</h2>
+            <audio id="audioPlayer" controls>
+                <source src="./Hukum.mp3" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            
+            <div class="controls">
+                <button id="audioPlayPause">Play</button>
+                <div class="volume-control">
+                    <label for="audioVolume">Volume:</label>
+                    <input type="range" id="audioVolume" min="0" max="1" step="0.1" value="1">
+                </div>
+                <span class="time-display" id="audioTime">00:00 / 00:00</span>
+            </div>
+        </div>
+        
+        <div class="media-section">
+            <h2>Match summary: Royal Challengers Bangalore vs. Gujarat Lions :</h2>
+            <video id="videoPlayer" width="640" height="460">
+                <source src="./RCB.mp4" type="video/mp4">
+                Your browser does not support the video element.
+            </video>
+            
+            <div class="controls">
+                <button id="videoPlayPause">Play</button>
+                <div class="volume-control">
+                    <label for="videoVolume">Volume:</label>
+                    <input type="range" id="videoVolume" min="0" max="1" step="0.1" value="1">
+                </div>
+                <span class="time-display" id="videoTime">00:00 / 00:00</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audio = document.getElementById('audioPlayer');
+        const audioPlayPauseBtn = document.getElementById('audioPlayPause');
+        const audioVolume = document.getElementById('audioVolume');
+        const audioTime = document.getElementById('audioTime');
+
+        audioPlayPauseBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                audioPlayPauseBtn.textContent = 'Pause';
+            } else {
+                audio.pause();
+                audioPlayPauseBtn.textContent = 'Play';
+            }
+        });
+
+        audioVolume.addEventListener('input', () => {
+            audio.volume = audioVolume.value;
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            const current = formatTime(audio.currentTime);
+            const duration = formatTime(audio.duration || 0);
+            audioTime.textContent = `${current} / ${duration}`;
+        });
+        const video = document.getElementById('videoPlayer');
+        const videoPlayPauseBtn = document.getElementById('videoPlayPause');
+        const videoVolume = document.getElementById('videoVolume');
+        const videoTime = document.getElementById('videoTime');
+
+        videoPlayPauseBtn.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+                videoPlayPauseBtn.textContent = 'Pause';
+            } else {
+                video.pause();
+                videoPlayPauseBtn.textContent = 'Play';
+            }
+        });
+
+        videoVolume.addEventListener('input', () => {
+            video.volume = videoVolume.value;
+        });
+
+        video.addEventListener('timeupdate', () => {
+            const current = formatTime(video.currentTime);
+            const duration = formatTime(video.duration || 0);
+            videoTime.textContent = `${current} / ${duration}`;
+        });
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+    </script>
+</body>
+</html>
