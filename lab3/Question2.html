@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Intelligent Shopping Cart</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 30px;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+      transition: transform 0.15s;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+    }
+    .product-img {
+      height: 180px;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+    }
+    .product-info {
+      padding: 16px;
+      text-align: center;
+    }
+    .product-title {
+      margin: 0 0 8px;
+      font-size: 1.15rem;
+    }
+    .product-price {
+      font-weight: bold;
+      color: #e74c3c;
+      margin-bottom: 12px;
+    }
+    .product-category {
+      font-size: 0.85rem;
+      color: #7f8c8d;
+      margin-bottom: 10px;
+    }
+    button.add-btn {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button.add-btn:hover {
+      background: #2980b9;
+    }
+    .cart {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.09);
+      padding: 24px;
+      position: sticky;
+      top: 24px;
+      height: fit-content;
+    }
+    .cart h2 {
+      margin: 0 0 20px 0;
+      font-size: 1.4rem;
+      color: #1a1a1a;
+    }
+    .cart-items-list {
+      margin-bottom: 20px;
+    }
+    .cart-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.98rem;
+    }
+    .cart-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .cart-item-name {
+      flex: 1;
+      font-weight: 500;
+      color: #2c3e50;
+    }
+    .cart-qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 4px 10px;
+    }
+    .cart-qty-controls button {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #555;
+    }
+    .cart-qty {
+      min-width: 32px;
+      text-align: center;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .cart-item-price {
+      min-width: 90px;
+      text-align: right;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .remove-btn {
+      background: none;
+      border: none;
+      color: #e74c3c;
+      font-size: 1.4rem;
+      cursor: pointer;
+      margin-left: 12px;
+      line-height: 1;
+    }
+    .cart-summary {
+      padding-top: 16px;
+      border-top: 1px solid #eee;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      font-size: 1.05rem;
+    }
+    .summary-row.subtotal {
+      color: #555;
+      font-weight: 500;
+    }
+    .summary-row.total {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-top: 8px;
+    }
+    .discount-rows {
+      margin: 12px 0;
+    }
+    .discount-row {
+      display: flex;
+      justify-content: space-between;
+      color: #27ae60;
+      font-weight: 600;
+      font-size: 0.97rem;
+      padding: 6px 0;
+    }
+    .empty-cart {
+      text-align: center;
+      color: #95a5a6;
+      padding: 60px 20px;
+      font-style: italic;
+    }
+    @media (max-width: 850px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+      .cart {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Intelligent Shopping Cart</h1>
+
+<div class="container">
+  <div>
+    <h2>Available Products</h2>
+    <div class="products" id="products"></div>
+  </div>
+
+  <div>
+    <div class="cart">
+      <h2>Your Cart</h2>
+      <div id="cartItems" class="cart-items-list"></div>
+      <div class="cart-summary">
+        <div class="summary-row subtotal">
+          <span>Subtotal</span>
+          <span id="subtotal">$0.00</span>
+        </div>
+        <div id="discountRows" class="discount-rows"></div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span id="total">$0.00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const products = [
+  { id:1, name:"Wireless Mouse",     price:29.99, category:"Electronics", emoji:"🖱️" },
+  { id:2, name:"Mechanical Keyboard", price:89.99, category:"Electronics", emoji:"⌨️" },
+  { id:3, name:"USB-C Hub",          price:39.99, category:"Electronics", emoji:"🔌" },
+  { id:4, name:"Coffee Mug",         price:14.99, category:"Home",        emoji:"☕" },
+  { id:5, name:"Notebook Set (3)",   price:19.99, category:"Home",        emoji:"📓" },
+  { id:6, name:"Desk Lamp",          price:34.99, category:"Home",        emoji:"💡" },
+  { id:7, name:"T-Shirt",            price:24.99, category:"Clothing",    emoji:"👕" },
+  { id:8, name:"Hoodie",             price:49.99, category:"Clothing",    emoji:"🧥" }
+];
+
+const bulkDiscounts = [
+  { minQty: 3,  discount: 0.10 },
+  { minQty: 5,  discount: 0.15 },
+  { minQty: 10, discount: 0.25 }
+];
+
+const categoryDiscounts = [
+  { category: "Electronics", minQty: 3, discount: 0.10 },
+  { category: "Clothing",    minQty: 2, discount: 0.15 }
+];
+
+let cart = {};
+
+const productsDiv    = document.getElementById("products");
+const cartItemsDiv   = document.getElementById("cartItems");
+const discountRowsDiv = document.getElementById("discountRows");
+const subtotalSpan   = document.getElementById("subtotal");
+const totalSpan      = document.getElementById("total");
+
+function renderProducts() {
+  productsDiv.innerHTML = "";
+  products.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "product-card";
+    card.innerHTML = `
+      <div class="product-img">${p.emoji}</div>
+      <div class="product-info">
+        <h3 class="product-title">${p.name}</h3>
+        <div class="product-category">${p.category}</div>
+        <div class="product-price">$${p.price.toFixed(2)}</div>
+        <button class="add-btn" onclick="addToCart(${p.id})">Add to Cart</button>
+      </div>
+    `;
+    productsDiv.appendChild(card);
+  });
+}
+
+function addToCart(id) {
+  cart[id] = (cart[id] || 0) + 1;
+  renderCart();
+}
+
+function changeQty(id, delta) {
+  if (!cart[id]) return;
+  cart[id] = Math.max(1, cart[id] + delta);
+  renderCart();
+}
+
+function removeItem(id) {
+  delete cart[id];
+  renderCart();
+}
+
+function calculateCart() {
+  let subtotal = 0;
+  let itemCountByCategory = {};
+  let bulkDiscountAmount = 0;
+  let categoryDiscountAmount = 0;
+
+  for (const [id, qty] of Object.entries(cart)) {
+    const prod = products.find(p => p.id === Number(id));
+    if (!prod) continue;
+    const itemTotal = prod.price * qty;
+    subtotal += itemTotal;
+    itemCountByCategory[prod.category] = (itemCountByCategory[prod.category] || 0) + qty;
+
+    let bestBulkRate = 0;
+    for (const rule of bulkDiscounts) {
+      if (qty >= rule.minQty) bestBulkRate = Math.max(bestBulkRate, rule.discount);
+    }
+    if (bestBulkRate > 0) bulkDiscountAmount += itemTotal * bestBulkRate;
+  }
+
+  for (const rule of categoryDiscounts) {
+    const catQty = itemCountByCategory[rule.category] || 0;
+    if (catQty >= rule.minQty) {
+      let catTotal = 0;
+      for (const [id, qty] of Object.entries(cart)) {
+        const prod = products.find(p => p.id === Number(id));
+        if (prod && prod.category === rule.category) catTotal += prod.price * qty;
+      }
+      categoryDiscountAmount += catTotal * rule.discount;
+    }
+  }
+
+  const totalDiscount = bulkDiscountAmount + categoryDiscountAmount;
+  const finalTotal = Math.max(0, subtotal - totalDiscount);
+
+  return {
+    subtotal: subtotal.toFixed(2),
+    bulkDiscount: bulkDiscountAmount.toFixed(2),
+    categoryDiscount: categoryDiscountAmount.toFixed(2),
+    finalTotal: finalTotal.toFixed(2)
+  };
+}
+
+function renderCart() {
+  cartItemsDiv.innerHTML = "";
+  discountRowsDiv.innerHTML = "";
+
+  if (Object.keys(cart).length === 0) {
+    cartItemsDiv.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
+    subtotalSpan.textContent = "$0.00";
+    totalSpan.textContent = "$0.00";
+    return;
+  }
+
+  let html = "";
+  let subtotal = 0;
+
+  for (const [id, qty] of Object.entries(cart)) {
+    const p = products.find(prod => prod.id === Number(id));
+    if (!p) continue;
+    const price = p.price * qty;
+    subtotal += price;
+
+    html += `
+      <div class="cart-item">
+        <span class="cart-item-name">${p.name}</span>
+        <div class="cart-qty-controls">
+          <button onclick="changeQty(${id}, -1)">−</button>
+          <span class="cart-qty">${qty}</span>
+          <button onclick="changeQty(${id}, 1)">+</button>
+        </div>
+        <span class="cart-item-price">$${price.toFixed(2)}</span>
+        <button class="remove-btn" onclick="removeItem(${id})">×</button>
+      </div>
+    `;
+  }
+
+  const calc = calculateCart();
+
+  let discountHtml = "";
+  if (Number(calc.bulkDiscount) > 0) {
+    discountHtml += `<div class="discount-row"><span>Bulk discount</span><span>-$${calc.bulkDiscount}</span></div>`;
+  }
+  if (Number(calc.categoryDiscount) > 0) {
+    discountHtml += `<div class="discount-row"><span>Category discount</span><span>-$${calc.categoryDiscount}</span></div>`;
+  }
+
+  cartItemsDiv.innerHTML = html;
+  discountRowsDiv.innerHTML = discountHtml;
+  subtotalSpan.textContent = `$${calc.subtotal}`;
+  totalSpan.textContent = `$${calc.finalTotal}`;
+}
+
+renderProducts();
+renderCart();
+</script>
+</body>
+</html>
