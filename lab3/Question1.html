@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Adaptive Registration</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+        }
+        form {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 420px;
+        }
+        h2 { text-align: center; margin: 0 0 1.8rem; color: #1e293b; }
+        .form-group { margin-bottom: 1.4rem; position: relative; }
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+            color: #334155;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem 0.9rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.15s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+            outline: none;
+        }
+        .form-group.touched.invalid input,
+        .form-group.touched.invalid select,
+        .form-group.touched.invalid textarea {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+        }
+        .error {
+            color: #ef4444;
+            font-size: 0.82rem;
+            margin-top: 0.35rem;
+            display: none;
+        }
+        .form-group.touched .error {
+            display: block;
+        }
+        button {
+            width: 100%;
+            padding: 0.9rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        button:hover:not(:disabled) { background: #2563eb; }
+        button:disabled { background: #94a3b8; cursor: not-allowed; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<form id="regForm" novalidate>
+    <h2>Create Your Account</h2>
+
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" autocomplete="name">
+        <div class="error" data-for="name">Name is required</div>
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" autocomplete="email">
+        <div class="error" data-for="email"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password">
+        <div class="error" data-for="password"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword">
+        <div class="error" data-for="confirmPassword"></div>
+    </div>
+
+    <div class="form-group age-group hidden">
+        <label for="age">Age</label>
+        <input type="number" id="age" min="0">
+        <div class="error" data-for="age"></div>
+    </div>
+
+    <div class="form-group">
+        <label for="role">Role</label>
+        <select id="role">
+            <option value="">Select role</option>
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+            <option value="admin">Admin</option>
+        </select>
+        <div class="error" data-for="role">Please select a role</div>
+    </div>
+
+    <div class="form-group skills-group hidden">
+        <label for="skills">Skills (comma separated)</label>
+        <textarea id="skills" rows="2"></textarea>
+        <div class="error" data-for="skills"></div>
+    </div>
+
+    <button type="submit" disabled>Register</button>
+</form>
+
+<script>
+     const form = document.getElementById('regForm');
+     const submitBtn = form.querySelector('button[type="submit"]');
+
+     const getField = id => document.getElementById(id);
+     const getError = fieldName => form.querySelector(`.error[data-for="${fieldName}"]`);
+
+     const fields = {
+     name: getField('name'),
+     email: getField('email'),
+     password: getField('password'),
+     confirmPassword: getField('confirmPassword'),
+     age: getField('age'),
+     role: getField('role'),
+     skills: getField('skills')
+     };
+
+     const ageGroup  = form.querySelector('.age-group');
+     const skillsGroup = form.querySelector('.skills-group');
+
+     function toggleRoleFields() {
+     const role = fields.role.value;
+     ageGroup.classList.toggle('hidden', !['student','admin'].includes(role));
+     skillsGroup.classList.toggle('hidden', !['teacher','admin'].includes(role));
+     }
+
+     function markTouched(field) {
+     field.closest('.form-group').classList.add('touched');
+     }
+
+     function getEmailErrorMsg(email, role) {
+     if (!email) return "Email is required";
+     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Invalid email format";
+     if ((role === 'student' || role === 'teacher') && !email.toLowerCase().endsWith('.edu')) {
+          return `${role.charAt(0).toUpperCase() + role.slice(1)}s must use .edu email`;
+     }
+     return "";
+     }
+
+     function validate(fieldName) {
+     const field = fields[fieldName];
+     const group = field.closest('.form-group');
+     const value = field.value.trim();
+     const role = fields.role.value;
+     const errorEl = getError(fieldName === 'confirmPassword' ? 'confirmPassword' : fieldName);
+     let msg = "";
+     let valid = true;
+
+     if (!group.classList.contains('touched') && value === '') {
+          errorEl.textContent = "";
+          group.classList.remove('invalid');
+          return true;
+     }
+
+     switch (fieldName) {
+          case 'name':
+               if (!value) msg = "Name is required";
+               break;
+          case 'email':
+               msg = getEmailErrorMsg(value, role);
+               break;
+          case 'password':
+               if (value.length < 8) msg = "At least 8 characters required";
+               else if (role === 'admin' && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(value)) {
+                    msg = "Must contain uppercase, lowercase, number & special char";
+               }
+               break;
+          case 'confirmPassword':
+               if (value !== fields.password.value) msg = "Passwords do not match";
+               break;
+          case 'age':
+               if (ageGroup.classList.contains('hidden')) return true;
+               const age = Number(value);
+               if (!value || isNaN(age) || age < 18) msg = "Must be 18 or older";
+               else if (role === 'student' && age > 25) msg = "Students must be 25 or younger";
+               break;
+          case 'role':
+               if (!value) msg = "Please select a role";
+               break;
+          case 'skills':
+               if (skillsGroup.classList.contains('hidden')) return true;
+               if (!value && ['teacher','admin'].includes(role)) msg = "Skills are required for this role";
+               break;
+     }
+
+     errorEl.textContent = msg;
+     if (msg) {
+          group.classList.add('invalid');
+          valid = false;
+     } else {
+          group.classList.remove('invalid');
+     }
+
+     return valid;
+     }
+
+     function checkFormValidity() {
+     let isValid = true;
+     Object.keys(fields).forEach(key => {
+          if (!validate(key)) isValid = false;
+     });
+     submitBtn.disabled = !isValid;
+     }
+     Object.values(fields).forEach(field => {
+     field.addEventListener('blur', () => {
+          markTouched(field);
+          checkFormValidity();
+     });
+
+     field.addEventListener('input', () => {
+          if (field.closest('.form-group').classList.contains('touched')) {
+               checkFormValidity();
+          }
+     });
+     });
+
+     fields.role.addEventListener('change', () => {
+     toggleRoleFields();
+     markTouched(fields.role);
+     checkFormValidity();
+     });
+
+     form.addEventListener('submit', e => {
+     e.preventDefault();
+     Object.values(fields).forEach(f => markTouched(f));
+     checkFormValidity();
+
+     if (!submitBtn.disabled) {
+          alert("Registration looks good! (form would be sent now)");
+     }
+     });
+     toggleRoleFields();
+     submitBtn.disabled = true;
+</script>
+</body>
+</html>
