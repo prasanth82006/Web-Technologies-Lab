@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Dell XPS 15 Laptop",
+    "category": "Electronics",
+    "price": 189990
+  },
+  {
+    "name": "iPhone 14 Pro",
+    "category": "Mobile",
+    "price": 119900
+  },
+  {
+    "name": "Samsung Galaxy S23",
+    "category": "Mobile",
+    "price": 74999
+  },
+  {
+    "name": "Sony WH-1000XM5 Headphones",
+    "category": "Electronics",
+    "price": 29990
+  },
+  {
+    "name": "Nike Air Max Sneakers",
+    "category": "Footwear",
+    "price": 12999
+  },
+  {
+    "name": "Levi's Slim Fit Jeans",
+    "category": "Clothing",
+    "price": 3499
+  },
+  {
+    "name": "The Alchemist - Paulo Coelho",
+    "category": "Books",
+    "price": 299
+  },
+  {
+    "name": "Prestige Induction Cooktop",
+    "category": "Kitchen",
+    "price": 4299
+  },
+  {
+    "name": "Mi Smart LED TV 43\"",
+    "category": "Electronics",
+    "price": 28999
+  },
+  {
+    "name": "Apple AirPods Pro 2",
+    "category": "Electronics",
+    "price": 24900
+  }
+]

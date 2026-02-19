@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Management - AJAX JSON</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --light: #f9fafb;
+      --dark: #111827;
+      --gray: #6b7280;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+      color: var(--dark);
+      min-height: 100vh;
+      padding: 20px 15px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .message {
+      margin: 1.5rem 2rem 0.5rem;
+      padding: 14px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+
+    .message.success { background:#d1fae5; color:#065f46; }
+    .message.error   { background:#fee2e2; color:#991b1b; }
+    .message.warning { background:#fef3c7; color:#92400e; }
+
+    .form-section, .table-section {
+      padding: 2rem;
+    }
+
+    h2 {
+      color: var(--primary-dark);
+      margin-bottom: 1.3rem;
+      font-size: 1.6rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.4rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+    }
+
+    .form-buttons {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-save   { background: var(--primary); color: white; }
+    .btn-save:hover   { background: var(--primary-dark); }
+
+    .btn-clear  { background: #e5e7eb; color: #374151; }
+    .btn-clear:hover  { background: #d1d5db; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    th {
+      background: #f3f4f6;
+      color: #374151;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+    }
+
+    tr:hover { background: #f9fafb; }
+
+    .action-btn {
+      padding: 8px 14px;
+      margin: 0 4px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-edit   { background:#fef3c7; color:#92400e; }
+    .btn-edit:hover   { background:#fde68a; }
+
+    .btn-delete { background:#fee2e2; color:#991b1b; }
+    .btn-delete:hover { background:#fecaca; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1><i class="fas fa-users-gear"></i> Student Management</h1>
+    <p>AJAX + JSON CRUD (Local File Simulation)</p>
+  </header>
+
+  <div id="message" class="message"></div>
+
+  <section class="form-section">
+    <h2><i class="fas fa-user-plus"></i> Add / Edit Student</h2>
+    <div class="form-grid">
+      <div>
+        <label>Student ID</label>
+        <input type="text" id="studentId" placeholder="S001" required>
+      </div>
+      <div>
+        <label>Full Name</label>
+        <input type="text" id="name" placeholder="Aarav Sharma" required>
+      </div>
+      <div>
+        <label>Department</label>
+        <input type="text" id="department" placeholder="Computer Science" required>
+      </div>
+      <div>
+        <label>Marks (out of 1000)</label>
+        <input type="number" id="marks" min="0" max="1000" placeholder="892" required>
+      </div>
+
+      <input type="hidden" id="editIndex" value="">
+
+      <div class="form-buttons">
+        <button class="btn-save" onclick="saveStudent()">
+          <i class="fas fa-save"></i> Save
+        </button>
+        <button class="btn-clear" onclick="resetForm()">
+          <i class="fas fa-eraser"></i> Clear
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="table-section">
+    <h2><i class="fas fa-table-list"></i> Students List</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Department</th>
+          <th>Marks</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="studentTableBody"></tbody>
+    </table>
+  </section>
+</div>
+
+<script>
+const JSON_FILE = "students.json";
+let students = [];
+
+async function loadStudents() {
+  try {
+    const response = await fetch(JSON_FILE + "?t=" + Date.now());
+    if (!response.ok) {
+      if (response.status === 404) {
+        await initializeEmptyJson();
+        return;
+      }
+      throw new Error(`HTTP ${response.status}`);
+    }
+    students = await response.json();
+    renderTable();
+  } catch (err) {
+    showMessage("Failed to load students: " + err.message, "error");
+  }
+}
+
+async function initializeEmptyJson() {
+  const empty = [];
+  await saveToJson(empty);
+  showMessage("students.json not found → created empty file.<br>Please place it in the same folder and refresh.", "warning");
+}
+
+async function saveToJson(data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "students.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function renderTable() {
+  const tbody = document.getElementById("studentTableBody");
+  tbody.innerHTML = "";
+
+  if (students.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#6b7280;">No students found</td></tr>';
+    return;
+  }
+
+  students.forEach((student, index) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><strong>${student.id}</strong></td>
+      <td>${student.name}</td>
+      <td>${student.department}</td>
+      <td>${student.marks}</td>
+      <td>
+        <button class="action-btn btn-edit" onclick="editStudent(${index})">
+          <i class="fas fa-edit"></i> Edit
+        </button>
+        <button class="action-btn btn-delete" onclick="deleteStudent(${index})">
+          <i class="fas fa-trash"></i> Delete
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function saveStudent() {
+  const id = document.getElementById("studentId").value.trim();
+  const name = document.getElementById("name").value.trim();
+  const department = document.getElementById("department").value.trim();
+  const marks = document.getElementById("marks").value.trim();
+  const editIndex = document.getElementById("editIndex").value;
+
+  if (!id || !name || !department || !marks) {
+    showMessage("All fields are required", "error");
+    return;
+  }
+
+  const marksNum = Number(marks);
+  if (isNaN(marksNum) || marksNum < 0 || marksNum > 1000) {
+    showMessage("Marks must be between 0 and 1000", "error");
+    return;
+  }
+
+  const studentData = { id, name, department, marks: marksNum };
+
+  try {
+    if (editIndex !== "") {
+      const idx = Number(editIndex);
+      students[idx] = studentData;
+      showMessage(`Student ${id} updated successfully`, "success");
+    } else {
+      if (students.some(s => s.id === id)) {
+        showMessage(`Student with ID ${id} already exists`, "error");
+        return;
+      }
+      students.push(studentData);
+      showMessage(`Student ${id} added successfully`, "success");
+    }
+
+    await saveToJson(students);
+    renderTable();
+    resetForm();
+  } catch (err) {
+    showMessage("Error saving student: " + err.message, "error");
+  }
+}
+
+function editStudent(index) {
+  const s = students[index];
+  document.getElementById("studentId").value = s.id;
+  document.getElementById("studentId").disabled = true;
+  document.getElementById("name").value = s.name;
+  document.getElementById("department").value = s.department;
+  document.getElementById("marks").value = s.marks;
+  document.getElementById("editIndex").value = index;
+}
+
+function deleteStudent(index) {
+  if (!confirm("Delete this student record?")) return;
+
+  const id = students[index].id;
+  students.splice(index, 1);
+
+  saveToJson(students)
+    .then(() => {
+      renderTable();
+      showMessage(`Student ${id} deleted`, "success");
+    })
+    .catch(err => showMessage("Error deleting student: " + err.message, "error"));
+}
+
+function resetForm() {
+  document.getElementById("studentId").disabled = false;
+  document.getElementById("studentId").value = "";
+  document.getElementById("name").value = "";
+  document.getElementById("department").value = "";
+  document.getElementById("marks").value = "";
+  document.getElementById("editIndex").value = "";
+}
+
+function showMessage(text, type = "info") {
+  const msg = document.getElementById("message");
+  msg.textContent = text;
+  msg.className = "message " + type;
+  setTimeout(() => msg.textContent = "", 5000);
+}
+
+window.onload = loadStudents;
+</script>
+</body>
+</html>

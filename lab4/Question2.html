@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Live Product Search</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --light-bg: #f0f9ff;
+      --card: #ffffff;
+      --text: #1e293b;
+      --gray: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--light-bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 30px 15px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      color: var(--primary-dark);
+      margin-bottom: 0.6rem;
+    }
+
+    .search-container {
+      position: relative;
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 16px 16px 16px 50px;
+      font-size: 1.1rem;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.25s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37,99,235,0.15);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray);
+      font-size: 1.4rem;
+    }
+
+    .loading {
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--primary);
+      font-size: 1.3rem;
+      animation: spin 1.2s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: translateY(-50%) rotate(360deg); }
+    }
+
+    .results-count {
+      text-align: center;
+      color: var(--gray);
+      margin: 1rem 0 1.5rem;
+      font-size: 1.05rem;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.6rem;
+    }
+
+    .product-card {
+      background: var(--card);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .product-img-placeholder {
+      height: 180px;
+      background: linear-gradient(135deg, #e0f2fe, #dbeafe);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+      color: rgba(37,99,235,0.25);
+    }
+
+    .product-info {
+      padding: 1.4rem;
+    }
+
+    .product-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+      color: var(--text);
+    }
+
+    .product-category {
+      color: var(--gray);
+      font-size: 0.95rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .product-price {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #059669;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--gray);
+      font-size: 1.3rem;
+    }
+
+    .no-results i {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1><i class="fas fa-search"></i> Live Product Search</h1>
+  </header>
+
+  <div class="search-container">
+    <i class="fas fa-search search-icon"></i>
+    <input 
+      type="text" 
+      class="search-input" 
+      id="searchInput" 
+      placeholder="Search products (laptop, phone, shirt...)"
+      autocomplete="off"
+    >
+    <i class="fas fa-circle-notch loading" id="loading"></i>
+  </div>
+
+  <div class="results-count" id="resultsCount"></div>
+
+  <div class="product-grid" id="productGrid"></div>
+</div>
+
+<script>
+const JSON_FILE = "products.json";
+const searchInput = document.getElementById("searchInput");
+const productGrid = document.getElementById("productGrid");
+const resultsCount = document.getElementById("resultsCount");
+const loading = document.getElementById("loading");
+
+let debounceTimer;
+let allProducts = [];
+
+window.addEventListener("load", async () => {
+  try {
+    const res = await fetch(JSON_FILE + "?t=" + Date.now());
+    if (!res.ok) throw new Error("Cannot load products");
+    allProducts = await res.json();
+    displayProducts(allProducts);
+  } catch (err) {
+    productGrid.innerHTML = `
+      <div class="no-results">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>Error loading products: ${err.message}</p>
+      </div>
+    `;
+  }
+});
+
+searchInput.addEventListener("input", () => {
+  clearTimeout(debounceTimer);
+
+  const query = searchInput.value.trim().toLowerCase();
+
+  debounceTimer = setTimeout(() => {
+    if (!query) {
+      displayProducts(allProducts);
+      return;
+    }
+
+    loading.style.display = "block";
+
+    setTimeout(() => {
+      const filtered = allProducts.filter(p =>
+        p.name.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query)
+      );
+
+      displayProducts(filtered);
+      loading.style.display = "none";
+    }, 400);
+
+  }, 500);
+});
+
+function displayProducts(products) {
+  productGrid.innerHTML = "";
+
+  if (products.length === 0) {
+    productGrid.innerHTML = `
+      <div class="no-results">
+        <i class="fas fa-search"></i>
+        <p>No products found matching your search</p>
+      </div>
+    `;
+    resultsCount.textContent = "";
+    return;
+  }
+
+  resultsCount.textContent = `Found ${products.length} product${products.length !== 1 ? 's' : ''}`;
+
+  products.forEach(product => {
+    const card = document.createElement("div");
+    card.className = "product-card";
+
+    card.innerHTML = `
+      <div class="product-img-placeholder">
+        <i class="fas fa-${getIconForCategory(product.category)}"></i>
+      </div>
+      <div class="product-info">
+        <div class="product-name">${product.name}</div>
+        <div class="product-category">${product.category}</div>
+        <div class="product-price">₹${Number(product.price).toLocaleString("en-IN")}</div>
+      </div>
+    `;
+
+    productGrid.appendChild(card);
+  });
+}
+
+function getIconForCategory(category) {
+  const icons = {
+    "Electronics": "laptop",
+    "Mobile": "mobile-alt",
+    "Clothing": "tshirt",
+    "Footwear": "shoe-prints",
+    "Books": "book",
+    "Home": "home",
+    "Kitchen": "utensils",
+    default: "box"
+  };
+  return icons[category] || icons.default;
+}
+</script>
+</body>
+</html>

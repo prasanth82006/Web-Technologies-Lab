@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --bg: #f0f9ff;
+      --card: #ffffff;
+      --text: #1e293b;
+      --gray: #64748b;
+      --border: #e2e8f0;
+      --sun: #fbbf24;
+      --cloud: #94a3b8;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px 15px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 2rem 1.8rem;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .search-box {
+      padding: 1.8rem 1.8rem 1rem;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 14px 16px 14px 48px;
+      font-size: 1.1rem;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 36px;
+      top: 50px;
+      color: var(--gray);
+      font-size: 1.3rem;
+    }
+
+    .btn-search {
+      position: absolute;
+      right: 36px;
+      top: 48px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-search:hover {
+      background: var(--primary-dark);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--gray);
+      font-size: 1.2rem;
+      display: none;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      border: 4px solid rgba(59,130,246,0.2);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin-right: 12px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .weather-card {
+      padding: 0 1.8rem 2.5rem;
+      text-align: center;
+    }
+
+    .city-name {
+      font-size: 2.1rem;
+      font-weight: 700;
+      margin: 0.8rem 0 0.3rem;
+    }
+
+    .weather-icon {
+      font-size: 7rem;
+      margin: 1rem 0;
+      line-height: 1;
+    }
+
+    .temperature {
+      font-size: 4.2rem;
+      font-weight: 600;
+      margin: 0.2rem 0;
+    }
+
+    .description {
+      font-size: 1.4rem;
+      color: var(--gray);
+      text-transform: capitalize;
+      margin-bottom: 1.5rem;
+    }
+
+    .details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      background: #f8fafc;
+      padding: 1.5rem;
+      border-radius: 12px;
+    }
+
+    .detail-item {
+      text-align: center;
+    }
+
+    .detail-label {
+      color: var(--gray);
+      font-size: 0.95rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .detail-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .error-message {
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      color: #dc2626;
+      font-size: 1.15rem;
+      line-height: 1.5;
+    }
+
+    .error-message i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .last-searched {
+      text-align: center;
+      color: var(--gray);
+      font-size: 0.95rem;
+      padding: 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1><i class="fas fa-cloud-sun-rain"></i> Weather Now</h1>
+  </div>
+
+  <div class="search-box">
+    <i class="fas fa-search search-icon"></i>
+    <input type="text" class="search-input" id="cityInput" placeholder="Enter city name (e.g. Puducherry)" autocomplete="off">
+    <button class="btn-search" onclick="getWeather()">Search</button>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div> Fetching weather data...
+  </div>
+
+  <div id="weatherResult"></div>
+
+  <div class="last-searched" id="lastSearched">Last searched: —</div>
+</div>
+
+<script>
+const API_KEY = "64931a74feb2e857ca8aaf818dc410db"; // ← replace with your own OpenWeatherMap API key
+const CACHE_KEY = "lastWeatherCity";
+const CACHE_TIME = 30 * 60 * 1000; 
+
+const cityInput = document.getElementById("cityInput");
+const loading = document.getElementById("loading");
+const weatherResult = document.getElementById("weatherResult");
+const lastSearched = document.getElementById("lastSearched");
+
+cityInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") getWeather();
+});
+
+const lastCity = localStorage.getItem(CACHE_KEY);
+if (lastCity) {
+  cityInput.value = lastCity;
+  getWeather(true); 
+}
+
+async function getWeather(silent = false) {
+  const city = cityInput.value.trim();
+  if (!city) {
+    if (!silent) showError("Please enter a city name");
+    return;
+  }
+
+  if (!silent) {
+    loading.style.display = "block";
+    weatherResult.innerHTML = "";
+  }
+
+  try {
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      if (response.status === 404) throw new Error("City not found");
+      throw new Error(`HTTP error ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    displayWeather(data);
+
+    localStorage.setItem(CACHE_KEY, city);
+    lastSearched.textContent = `Last searched: ${city} • ${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+
+  } catch (error) {
+    if (!silent) {
+      showError(error.message.includes("City not found")
+        ? "City not found. Please check spelling."
+        : "Failed to fetch weather. Check your internet or API key.");
+    }
+  } finally {
+    if (!silent) loading.style.display = "none";
+  }
+}
+
+function displayWeather(data) {
+  const iconCode = data.weather[0].icon;
+  const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+
+  weatherResult.innerHTML = `
+    <div class="weather-card">
+      <div class="city-name">${data.name}, ${data.sys.country}</div>
+
+      <div style="font-size:6.5rem; margin:1rem 0;">
+        <img src="${iconUrl}" alt="${data.weather[0].description}" style="height:140px;">
+      </div>
+
+      <div class="temperature">${Math.round(data.main.temp)}°C</div>
+      <div class="description">${data.weather[0].description}</div>
+
+      <div class="details">
+        <div class="detail-item">
+          <div class="detail-label">Feels like</div>
+          <div class="detail-value">${Math.round(data.main.feels_like)}°C</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Humidity</div>
+          <div class="detail-value">${data.main.humidity}%</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Wind</div>
+          <div class="detail-value">${data.wind.speed} m/s</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Pressure</div>
+          <div class="detail-value">${data.main.pressure} hPa</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showError(message) {
+  weatherResult.innerHTML = `
+    <div class="error-message">
+      <i class="fas fa-exclamation-circle"></i>
+      <p>${message}</p>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
