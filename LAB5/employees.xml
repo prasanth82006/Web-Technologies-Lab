@@ -1,0 +1,36 @@
+<employees>
+    <employee>
+        <id>E001</id>
+        <name>Rahul Sharma</name>
+        <department>Engineering</department>
+        <salary>85000</salary>
+    </employee>
+    
+    <employee>
+        <id>E002</id>
+        <name>Priya Patel</name>
+        <department>Marketing</department>
+        <salary>62000</salary>
+    </employee>
+    
+    <employee>
+        <id>E003</id>
+        <name>Ananya Reddy</name>
+        <department>Human Resources</department>
+        <salary>68000</salary>
+    </employee>
+    
+    <employee>
+        <id>E004</id>
+        <name>Vikram Singh</name>
+        <department>Finance</department>
+        <salary>92000</salary>
+    </employee>
+    
+    <employee>
+        <id>E005</id>
+        <name>Sneha Kapoor</name>
+        <department>Engineering</department>
+        <salary>78000</salary>
+    </employee>
+</employees>

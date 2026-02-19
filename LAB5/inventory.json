@@ -1,0 +1,30 @@
+[
+  {
+    "id": "P001",
+    "name": "Wireless Mouse",
+    "category": "Electronics",
+    "price": 899.50,
+    "stock": 42
+  },
+  {
+    "id": "P002",
+    "name": "T-Shirt Cotton",
+    "category": "Clothing",
+    "price": 499.00,
+    "stock": 3
+  },
+  {
+    "id": "P003",
+    "name": "Bluetooth Speaker",
+    "category": "Electronics",
+    "price": 2499.00,
+    "stock": 18
+  },
+  {
+    "id": "P004",
+    "name": "Coffee Mug Set",
+    "category": "Home & Kitchen",
+    "price": 799.00,
+    "stock": 65
+  }
+]

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product Inventory - JSON</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #7c3aed;
+      --primary-dark: #6d28d9;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --light: #f9fafb;
+      --dark: #111827;
+      --gray: #6b7280;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #f3e8ff, #e0f2fe);
+      color: var(--dark);
+      min-height: 100vh;
+      padding: 20px 15px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 2rem 2.5rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.3rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .stats {
+      margin: 1.5rem 2.5rem;
+      padding: 1.2rem;
+      background: #f3f4f6;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .stat-item {
+      text-align: center;
+      flex: 1;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .message {
+      margin: 0 2.5rem 1rem;
+      padding: 14px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+
+    .message.success { background:#d1fae5; color:#065f46; }
+    .message.error   { background:#fee2e2; color:#991b1b; }
+    .message.info    { background:#dbeafe; color:#1e40af; }
+
+    .form-section, .table-section {
+      padding: 0 2.5rem 2.5rem;
+    }
+
+    h2 {
+      color: var(--primary-dark);
+      margin: 1.8rem 0 1.2rem;
+      font-size: 1.7rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.4rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+    }
+
+    .form-buttons {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.2rem;
+    }
+
+    button {
+      padding: 12px 22px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-save   { background: var(--primary); color: white; }
+    .btn-save:hover   { background: var(--primary-dark); transform: translateY(-1px); }
+
+    .btn-clear  { background: #e5e7eb; color: #374151; }
+    .btn-clear:hover  { background: #d1d5db; }
+
+    .search-box {
+      margin: 1.5rem 0;
+      max-width: 400px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 14px 12px 40px;
+      font-size: 1rem;
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray);
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    th {
+      background: #f3f4f6;
+      color: #374151;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+    }
+
+    tr:hover { background: #f9fafb; }
+
+    .low-stock {
+      background: #fef3c7 !important;
+      font-weight: 600;
+    }
+
+    .price {
+      font-weight: 600;
+      color: #1e40af;
+    }
+
+    .action-btn {
+      padding: 8px 14px;
+      margin: 0 4px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-edit   { background:#fef3c7; color:#92400e; }
+    .btn-edit:hover   { background:#fde68a; }
+
+    .btn-delete { background:#fee2e2; color:#991b1b; }
+    .btn-delete:hover { background:#fecaca; }
+
+    .required { color: var(--danger); }
+
+    @media (max-width: 768px) {
+      .stats { flex-direction: column; }
+      .form-buttons { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1><i class="fas fa-boxes-stacked"></i> Product Inventory</h1>
+    <p>Local JSON Powered Inventory Manager</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat-item">
+      <div>Total Products</div>
+      <div class="stat-value" id="totalProducts">0</div>
+    </div>
+    <div class="stat-item">
+      <div>Total Inventory Value</div>
+      <div class="stat-value" id="totalValue">₹0.00</div>
+    </div>
+    <div class="stat-item">
+      <div>Low Stock Items</div>
+      <div class="stat-value" id="lowStockCount">0</div>
+    </div>
+  </div>
+
+  <div id="message" class="message"></div>
+
+  <section class="form-section">
+    <h2><i class="fas fa-plus-circle"></i> Add / Edit Product</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="prodId">Product ID <span class="required">*</span></label>
+        <input type="text" id="prodId" placeholder="P001" required>
+      </div>
+      <div class="form-group">
+        <label for="name">Product Name <span class="required">*</span></label>
+        <input type="text" id="name" placeholder="Wireless Mouse" required>
+      </div>
+      <div class="form-group">
+        <label for="category">Category <span class="required">*</span></label>
+        <select id="category" required>
+          <option value="">Select category</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Home & Kitchen">Home & Kitchen</option>
+          <option value="Books">Books</option>
+          <option value="Beauty">Beauty</option>
+          <option value="Sports">Sports</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="price">Price (₹) <span class="required">*</span></label>
+        <input type="number" id="price" step="0.01" min="0.01" placeholder="999.99" required>
+      </div>
+      <div class="form-group">
+        <label for="stock">Stock Quantity <span class="required">*</span></label>
+        <input type="number" id="stock" min="0" placeholder="50" required>
+      </div>
+
+      <input type="hidden" id="editIndex" value="">
+
+      <div class="form-buttons">
+        <button class="btn-save" onclick="saveProduct()">
+          <i class="fas fa-save"></i> Save Product
+        </button>
+        <button class="btn-clear" onclick="resetForm()">
+          <i class="fas fa-eraser"></i> Clear
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="table-section">
+    <h2><i class="fas fa-list-check"></i> Inventory List</h2>
+
+    <div class="search-box" style="position:relative;">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchCategory" placeholder="Search by category (e.g. Electronics)" oninput="filterTable()">
+    </div>
+
+    <div class="table-wrapper">
+      <table id="inventoryTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryBody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+const JSON_FILE = "inventory.json";
+let products = [];
+
+async function loadProducts() {
+  try {
+    const res = await fetch(JSON_FILE + '?t=' + Date.now());
+    if (!res.ok) {
+      if (res.status === 404) {
+        await initEmptyJson();
+        return;
+      }
+      throw new Error(`HTTP ${res.status}`);
+    }
+    products = await res.json();
+    updateStats();
+    renderTable();
+  } catch (err) {
+    showMessage("Error loading inventory: " + err.message, "error");
+  }
+}
+
+async function initEmptyJson() {
+  const empty = [];
+  await saveJson(empty);
+  showMessage("inventory.json not found → template created.<br>Place it next to this file and refresh.", "info");
+}
+
+async function saveJson(data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "inventory.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function renderTable(filterCategory = "") {
+  const tbody = document.getElementById("inventoryBody");
+  tbody.innerHTML = "";
+
+  const filtered = filterCategory 
+    ? products.filter(p => p.category.toLowerCase().includes(filterCategory.toLowerCase()))
+    : products;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2.5rem;color:#6b7280;">No products found</td></tr>';
+    return;
+  }
+
+  filtered.forEach((p, i) => {
+    const originalIndex = products.indexOf(p);
+    const row = document.createElement("tr");
+    if (p.stock <= 5) row.classList.add("low-stock");
+
+    row.innerHTML = `
+      <td><strong>${p.id}</strong></td>
+      <td>${p.name}</td>
+      <td>${p.category}</td>
+      <td class="price">₹${Number(p.price).toFixed(2)}</td>
+      <td>${p.stock}${p.stock <= 5 ? ' <span style="color:#ef4444;">(Low)</span>' : ''}</td>
+      <td>
+        <button class="action-btn btn-edit" onclick="editProduct(${originalIndex})">
+          <i class="fas fa-edit"></i> Edit
+        </button>
+        <button class="action-btn btn-delete" onclick="deleteProduct(${originalIndex})">
+          <i class="fas fa-trash-alt"></i> Delete
+        </button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function updateStats() {
+  const totalItems = products.length;
+  const totalValue = products.reduce((sum, p) => sum + (Number(p.price) * p.stock), 0);
+  const lowStock = products.filter(p => p.stock <= 5).length;
+
+  document.getElementById("totalProducts").textContent = totalItems;
+  document.getElementById("totalValue").textContent = `₹${totalValue.toFixed(2)}`;
+  document.getElementById("lowStockCount").textContent = lowStock;
+}
+
+function saveProduct() {
+  const id       = document.getElementById("prodId").value.trim();
+  const name     = document.getElementById("name").value.trim();
+  const category = document.getElementById("category").value;
+  const price    = document.getElementById("price").value.trim();
+  const stock    = document.getElementById("stock").value.trim();
+  const editIdx  = document.getElementById("editIndex").value;
+
+  if (!id || !name || !category || !price || !stock) {
+    showMessage("All fields are required", "error");
+    return;
+  }
+
+  const priceNum = Number(price);
+  const stockNum = Number(stock);
+
+  if (isNaN(priceNum) || priceNum <= 0) {
+    showMessage("Price must be a positive number", "error");
+    return;
+  }
+  if (isNaN(stockNum) || stockNum < 0) {
+    showMessage("Stock must be 0 or greater", "error");
+    return;
+  }
+
+  const product = { id, name, category, price: priceNum, stock: stockNum };
+
+  if (editIdx !== "") {
+    const idx = Number(editIdx);
+    products[idx] = product;
+    showMessage(`Product ${id} updated`, "success");
+  } else {
+    if (products.some(p => p.id === id)) {
+      showMessage(`Product ID ${id} already exists`, "error");
+      return;
+    }
+    products.push(product);
+    showMessage(`Product ${id} added`, "success");
+  }
+
+  saveJson(products);
+  updateStats();
+  renderTable(document.getElementById("searchCategory").value);
+  resetForm();
+}
+
+function editProduct(index) {
+  const p = products[index];
+  document.getElementById("prodId").value = p.id;
+  document.getElementById("prodId").disabled = true;
+  document.getElementById("name").value = p.name;
+  document.getElementById("category").value = p.category;
+  document.getElementById("price").value = p.price;
+  document.getElementById("stock").value = p.stock;
+  document.getElementById("editIndex").value = index;
+
+  showMessage(`Editing ${p.name} (${p.id})`, "info");
+}
+
+function deleteProduct(index) {
+  if (!confirm("Remove this product permanently?")) return;
+  const id = products[index].id;
+  products.splice(index, 1);
+  saveJson(products);
+  updateStats();
+  renderTable(document.getElementById("searchCategory").value);
+  showMessage(`Product ${id} deleted`, "success");
+}
+
+function filterTable() {
+  const term = document.getElementById("searchCategory").value;
+  renderTable(term);
+}
+
+function resetForm() {
+  document.getElementById("prodId").disabled = false;
+  document.getElementById("prodId").value = "";
+  document.getElementById("name").value = "";
+  document.getElementById("category").value = "";
+  document.getElementById("price").value = "";
+  document.getElementById("stock").value = "";
+  document.getElementById("editIndex").value = "";
+}
+
+function showMessage(text, type = "info") {
+  const el = document.getElementById("message");
+  el.textContent = text;
+  el.className = "message " + type;
+  setTimeout(() => el.textContent = "", 5000);
+}
+
+window.onload = loadProducts;
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "S001",
+    "name": "Aarav Sharma",
+    "course": "B.Tech Computer Science",
+    "marks": 920
+  },
+  {
+    "id": "S002",
+    "name": "Priya Patel",
+    "course": "BBA Marketing",
+    "marks": 785
+  },
+  {
+    "id": "S003",
+    "name": "Rahul Verma",
+    "course": "B.Sc Physics",
+    "marks": 845
+  }
+]

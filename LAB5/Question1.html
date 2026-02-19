@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Employee Management - XML</title>
+    <style>
+     body {
+          font-family: Arial, sans-serif;
+          background: #f5f5f5;
+          margin: 0;
+          padding: 20px;
+     }
+
+     .container {
+          max-width: 1100px;
+          margin: 0 auto;
+          background: white;
+          padding: 25px;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+     }
+
+     h1 {
+          text-align: center;
+          color: #2c3e50;
+     }
+
+     .form-container {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 15px;
+          margin-bottom: 30px;
+     }
+
+     label {
+          display: block;
+          margin-bottom: 5px;
+          font-weight: bold;
+     }
+
+     input {
+          width: 100%;
+          padding: 8px;
+          box-sizing: border-box;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+     }
+
+     .buttons {
+          grid-column: 1 / -1;
+          text-align: center;
+     }
+
+     button {
+          padding: 10px 20px;
+          margin: 0 8px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 1rem;
+     }
+
+     button:hover {
+     opacity: 0.9;
+     }
+
+     .edit-btn    { background: #3498db; color: white; }
+     .delete-btn  { background: #e74c3c; color: white; }
+     .secondary   { background: #95a5a6; color: white; }
+
+     table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+     }
+
+     th, td {
+          padding: 12px;
+          text-align: left;
+          border-bottom: 1px solid #ddd;
+     }
+
+     th {
+          background: #34495e;
+          color: white;
+     }
+
+     .center { text-align: center; }
+
+     .message {
+          padding: 12px;
+          margin: 15px 0;
+          border-radius: 4px;
+          min-height: 20px;
+     }
+
+     .message.success { background: #d4edda; color: #155724; }
+     .message.error   { background: #f8d7da; color: #721c24; }
+     .message.warning { background: #fff3cd; color: #856404; }
+     .message.info    { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Employee Management System (XML)</h1>
+    <div id="message" class="message"></div>
+    <div class="form-container">
+        <input type="hidden" id="editId" value="">
+        <div>
+            <label>ID:</label>
+            <input type="text" id="empId" placeholder="e.g. E001" required>
+        </div>
+        <div>
+            <label>Name:</label>
+            <input type="text" id="empName" required>
+        </div>
+        <div>
+            <label>Department:</label>
+            <input type="text" id="empDept" required>
+        </div>
+        <div>
+            <label>Salary:</label>
+            <input type="number" id="empSalary" min="0" required>
+        </div>
+        <div class="buttons">
+            <button onclick="saveEmployee()">Save Employee</button>
+            <button onclick="clearForm()" class="secondary">Clear</button>
+        </div>
+    </div>
+
+    <table id="employeeTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Salary</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="employeeBody"></tbody>
+    </table>
+</div>
+
+<script>
+     const XML_FILE = "employees.xml";
+     let xmlDoc = null;
+
+     window.onload = function() {
+          loadEmployees();
+     };
+
+     function loadEmployees() {
+     const xhr = new XMLHttpRequest();
+     xhr.open("GET", XML_FILE + "?t=" + new Date().getTime(), true);
+     
+     xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4) {
+               if (xhr.status === 200) {
+                    try {
+                         xmlDoc = xhr.responseXML;
+                         if (!xmlDoc || !xmlDoc.documentElement) {
+                         showMessage("Error: Invalid XML format", "error");
+                         return;
+                         }
+                         displayEmployees();
+                    } catch (e) {
+                         showMessage("Error parsing XML: " + e.message, "error");
+                    }
+               }
+               else if (xhr.status === 404) {
+                    createEmptyXmlFile();
+               }
+               else {
+                    showMessage("Error loading employees (status: " + xhr.status + ")", "error");
+               }
+          }
+     };
+     
+     xhr.send();
+     }
+
+     function createEmptyXmlFile() {
+     const initialXml = `<?xml version="1.0" encoding="UTF-8"?>
+     <employees>
+     </employees>`;
+     const blob = new Blob([initialXml], { type: "application/xml" });
+     const url = URL.createObjectURL(blob);
+     
+     const a = document.createElement("a");
+     a.href = url;
+     a.download = "employees.xml";
+     a.click();
+     
+     URL.revokeObjectURL(url);
+     
+     showMessage("employees.xml was not found. A template file has been downloaded.<br>Please place it in the same folder and refresh.", "warning");
+     }
+
+     function displayEmployees() {
+     const tbody = document.getElementById("employeeBody");
+     tbody.innerHTML = "";
+     const employees = xmlDoc.getElementsByTagName("employee");
+     
+     if (employees.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="center">No employees found</td></tr>';
+          return;
+     }
+     for (let emp of employees) {
+          const id = emp.getElementsByTagName("id")[0]?.textContent || "";
+          const name = emp.getElementsByTagName("name")[0]?.textContent || "";
+          const dept = emp.getElementsByTagName("department")[0]?.textContent || "";
+          const salary = emp.getElementsByTagName("salary")[0]?.textContent || "";
+          const row = document.createElement("tr");
+          row.innerHTML = `
+               <td>${id}</td>
+               <td>${name}</td>
+               <td>${dept}</td>
+               <td>${salary}</td>
+               <td>
+                    <button class="edit-btn" onclick="editEmployee('${id}')">Edit</button>
+                    <button class="delete-btn" onclick="deleteEmployee('${id}')">Delete</button>
+               </td>
+          `;
+          tbody.appendChild(row);
+     }
+     }
+
+     function saveEmployee() {
+     const id = document.getElementById("empId").value.trim();
+     const name = document.getElementById("empName").value.trim();
+     const dept = document.getElementById("empDept").value.trim();
+     const sal = document.getElementById("empSalary").value.trim();
+     const editId = document.getElementById("editId").value;
+
+     if (!id || !name || !dept || !sal) {
+          showMessage("All fields are required!", "error");
+          return;
+     }
+     if (!xmlDoc) {
+          showMessage("XML document not loaded yet.", "error");
+          return;
+     }
+
+     if (!editId) {
+          const exists = Array.from(xmlDoc.getElementsByTagName("employee"))
+               .some(emp => emp.getElementsByTagName("id")[0]?.textContent === id);
+          
+          if (exists) {
+               showMessage(`Employee with ID ${id} already exists!`, "error");
+               return;
+          }
+     }
+
+     if (editId) {
+          const emp = Array.from(xmlDoc.getElementsByTagName("employee"))
+               .find(e => e.getElementsByTagName("id")[0]?.textContent === editId);
+          
+          if (emp) {
+               emp.getElementsByTagName("name")[0].textContent = name;
+               emp.getElementsByTagName("department")[0].textContent = dept;
+               emp.getElementsByTagName("salary")[0].textContent = sal;
+               showMessage(`Employee ${id} updated successfully`, "success");
+          }
+     } else {
+          const newEmp = xmlDoc.createElement("employee");
+          newEmp.appendChild(createNode("id", id));
+          newEmp.appendChild(createNode("name", name));
+          newEmp.appendChild(createNode("department", dept));
+          newEmp.appendChild(createNode("salary", sal));
+          xmlDoc.documentElement.appendChild(newEmp);
+          showMessage(`Employee ${id} added successfully`, "success");
+     }
+
+     saveXmlToFile();
+     clearForm();
+     displayEmployees();
+     }
+
+     function createNode(tagName, value) {
+     const node = xmlDoc.createElement(tagName);
+     node.textContent = value;
+     return node;
+     }
+
+     function saveXmlToFile() {
+     const serializer = new XMLSerializer();
+     const xmlString = serializer.serializeToString(xmlDoc);
+     
+     const blob = new Blob([xmlString], { type: "application/xml" });
+     const url = URL.createObjectURL(blob);
+     
+     const a = document.createElement("a");
+     a.href = url;
+     a.download = "employees.xml";
+     a.click();
+     
+     URL.revokeObjectURL(url);
+     
+     showMessage("→ Download the updated employees.xml and replace the old one", "info");
+     }
+
+     function editEmployee(id) {
+     const emp = Array.from(xmlDoc.getElementsByTagName("employee"))
+          .find(e => e.getElementsByTagName("id")[0]?.textContent === id);
+     
+     if (emp) {
+          document.getElementById("empId").value = id;
+          document.getElementById("empId").disabled = true;
+          document.getElementById("empName").value = emp.getElementsByTagName("name")[0]?.textContent || "";
+          document.getElementById("empDept").value = emp.getElementsByTagName("department")[0]?.textContent || "";
+          document.getElementById("empSalary").value = emp.getElementsByTagName("salary")[0]?.textContent || "";
+          document.getElementById("editId").value = id;
+          
+          showMessage(`Editing employee ${id}...`, "info");
+     }
+     }
+
+     function deleteEmployee(id) {
+     if (!confirm(`Delete employee ${id}?`)) return;
+     
+     const emp = Array.from(xmlDoc.getElementsByTagName("employee"))
+          .find(e => e.getElementsByTagName("id")[0]?.textContent === id);
+     
+     if (emp) {
+          xmlDoc.documentElement.removeChild(emp);
+          saveXmlToFile();
+          displayEmployees();
+          showMessage(`Employee ${id} deleted`, "success");
+     }
+     }
+
+     function clearForm() {
+     document.getElementById("empId").value = "";
+     document.getElementById("empId").disabled = false;
+     document.getElementById("empName").value = "";
+     document.getElementById("empDept").value = "";
+     document.getElementById("empSalary").value = "";
+     document.getElementById("editId").value = "";
+     }
+
+     function showMessage(text, type = "info") {
+     const msgDiv = document.getElementById("message");
+     msgDiv.innerHTML = text;
+     msgDiv.className = "message " + type;
+     
+     setTimeout(() => {
+          msgDiv.innerHTML = "";
+          msgDiv.className = "message";
+     }, 6000);
+     }
+</script>
+</body>
+</html>

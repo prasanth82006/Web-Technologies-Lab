@@ -1,0 +1,22 @@
+<library>
+  <book>
+    <id>B001</id>
+    <title>Clean Code</title>
+    <author>Robert C. Martin</author>
+    <status>Available</status>
+  </book>
+  
+  <book>
+    <id>B002</id>
+    <title>Designing Data-Intensive Applications</title>
+    <author>Martin Kleppmann</author>
+    <status>Borrowed</status>
+  </book>
+  
+  <book>
+    <id>B003</id>
+    <title>The Pragmatic Programmer</title>
+    <author>Andrew Hunt, David Thomas</author>
+    <status>Available</status>
+  </book>
+</library>
