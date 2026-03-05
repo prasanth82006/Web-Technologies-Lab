@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Notes Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1>Study Notes Manager</h1>
+
+    <form id="noteForm">
+      <input type="hidden" id="noteId">
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="title" required>
+      </div>
+      <div class="form-group">
+        <label>Subject</label>
+        <input type="text" id="subject" required>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="description" rows="5" required></textarea>
+      </div>
+      <div class="form-buttons">
+        <button type="submit" id="saveBtn">Add Note</button>
+        <button type="button" id="cancelBtn" style="display:none;">Cancel</button>
+      </div>
+    </form>
+
+    <div id="notesList"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
