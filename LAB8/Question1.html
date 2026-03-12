@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Marks Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #f9fbfc;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #34495e;
+        }
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+            margin-top: 25px;
+            min-height: 80px;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Student Marks Calculator</h1>
+
+        <div class="form-group">
+            <label for="studentName">Student Name:</label>
+            <input type="text" id="studentName" value="Prasanth" placeholder="Enter student name">
+        </div>
+
+        <div class="form-group">
+            <label for="mark1">Mark 1:</label>
+            <input type="number" id="mark1" min="0" max="100" value="70" placeholder="0-100">
+        </div>
+
+        <div class="form-group">
+            <label for="mark2">Mark 2:</label>
+            <input type="number" id="mark2" min="0" max="100" value="95" placeholder="0-100">
+        </div>
+
+        <div class="form-group">
+            <label for="mark3">Mark 3:</label>
+            <input type="number" id="mark3" min="0" max="100" value="100" placeholder="0-100">
+        </div>
+
+        <button onclick="calculateAndShow()">Calculate</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function calculateAndShow() {
+            const nameInput = document.getElementById("studentName").value.trim();
+            const m1 = Number(document.getElementById("mark1").value);
+            const m2 = Number(document.getElementById("mark2").value);
+            const m3 = Number(document.getElementById("mark3").value);
+
+            if (!nameInput) {
+                document.getElementById("result").innerHTML = "<strong style='color:#e74c3c'>Please enter student name</strong>";
+                return;
+            }
+
+            if (isNaN(m1) || isNaN(m2) || isNaN(m3) || 
+                m1 < 0 || m1 > 100 || m2 < 0 || m2 > 100 || m3 < 0 || m3 > 100) {
+                document.getElementById("result").innerHTML = "<strong style='color:#e74c3c'>Please enter valid marks (0–100)</strong>";
+                return;
+            }
+
+            const calculateAverage = (a, b, c) => (a + b + c) / 3;
+
+            const total = m1 + m2 + m3;
+            const average = calculateAverage(m1, m2, m3);
+            const formattedAverage = average.toFixed(2);
+
+            const output = `
+                <strong>Student Name:</strong> ${nameInput}<br>
+                <strong>Total Marks:</strong> ${total}<br>
+                <strong>Average Marks:</strong> ${formattedAverage}
+            `;
+
+            document.getElementById("result").innerHTML = output;
+
+            console.log(`Student Name: ${nameInput}`);
+            console.log(`Total Marks: ${total}`);
+            console.log(`Average Marks: ${formattedAverage}`);
+        }
+    </script>
+
+</body>
+</html>
